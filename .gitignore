@@ -1,0 +1,60 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# =========================
+# Virtual Environment
+# =========================
+venv/
+.venv/
+env/
+
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+.vscode/
+.idea/
+
+# =========================
+# ENV & Secrets
+# =========================
+.env
+.env.*
+
+# =========================
+# DATA (IMPORTANT)
+# =========================
+
+# Ignore all raw crawling data
+data/raw/
+data/processed/
+data/labeled/
+
+# Ignore common data formats
+*.csv
+*.xlsx
+*.xls
+*.json
+*.parquet
+
+# Temporary / Excel lock files
+~$*.xlsx
+
+# =========================
+# Models & Artifacts (optional)
+# =========================
+models/*.pkl
+models/*.joblib
+models/*.h5
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
