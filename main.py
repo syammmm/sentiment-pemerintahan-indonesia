@@ -1,69 +1,34 @@
 import pandas as pd
 from datetime import date, timedelta
-from pathlib import Path
 
-from crawlers.detik import get_article_links_by_date,extract_article,KEYWORDS
+
+from crawlers.detik import crawl_detik
 from crawlers.tempo import crawl_tempo
+from crawlers.cnn import crawl_cnn
 from config.settings import RAW_DATA_DIR
 from config.keywords import KEYWORDS
 
-START_DATE = date(2025, 1, 1)
-END_DATE = date(2025, 12, 31)
+START_DATE = date(2025, 2, 1)
+END_DATE = date(2025, 2, 28)
 
-#DETIK CRAWLER
-
-# results = []
-# current = START_DATE
-
-# while current <= END_DATE:
-#     date_str = current.strftime("%Y/%m/%d")
-#     print(f"Crawling Detik: {date_str}")
-
-#     articles = get_article_links_by_date(date_str)
-
-#     for title, link in articles:
-#         published, content = extract_article(link)
-#         if not published:
-#             continue
-
-#         text = (title + " " + content).lower()
-#         if not any(k in text for k in KEYWORDS):
-#             continue
-
-#         results.append({
-#             "media": "Detik.com",
-#             "title": title,
-#             "published_date": published.date(),
-#             "link": link,
-#             "content": content,
-#             "sentiment": ""
-#         })
-
-#     current += timedelta(days=1)
-
-# df = pd.DataFrame(results)
-# df.to_excel(
-#     "data/raw/detik_pemerintahan_2024_2025.xlsx",
-#     index=False
-# )
-
-# print(f"SELESAI — total artikel: {len(df)}")
-
-
-#TEMPO CRAWLER
+#MAIN CRAWLER
 if __name__ == "__main__":
-    START_DATE = "2025-09-01"
-    END_DATE = "2025-09-07"
+    START_DATE = START_DATE.strftime("%Y-%m-%d")
+    END_DATE = END_DATE.strftime("%Y-%m-%d")
 
-    print("🚀 Mulai crawling Tempo...")
-    data = crawl_tempo(START_DATE, END_DATE)
+    data_detik = crawl_detik(START_DATE, END_DATE)
+    data_cnn = crawl_cnn(START_DATE, END_DATE)
+    data_tempo = crawl_tempo(START_DATE, END_DATE)
+    data_all = data_cnn + data_tempo + data_detik
 
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(data_all)
     df.drop_duplicates(subset=["link"], inplace=True)
-
-    df.to_excel("data/raw/tempo_pemerintahan_2024_2025 1.xlsx", index=False)
-    output_path = "data/raw/tempo_pemerintahan_2024_2025..csv"
+    print(f"✅ Total artikel Tempo: {len(data_tempo)}")
+    print(f"✅ Total artikel Detik: {len(data_detik)}")
+    print(f"✅ Total artikel CNN: {len(data_cnn)}")
+    print(f"✅ Total artikel: {len(df)}")
+    df.to_excel("data/raw/media_elektronik_2024_2025_February.xlsx", index=False)
+    output_path = "data/raw/media_elektronik_2024_2025_February.csv"
     df.to_csv(output_path, index=False)
 
-    print(f"✅ Selesai. Total artikel: {len(df)}")
     print(f"📁 File tersimpan: {output_path}")

@@ -1,122 +1,177 @@
 import requests
-import re
 from bs4 import BeautifulSoup
 from datetime import datetime
+import time
+
+from config.settings import END_DATE, START_DATE
+from config.keywords import KEYWORDS
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
 }
 
-KEYWORDS = [
-    "pemerintah",
-    "pemerintahan",
-    "presiden",
-    "wakil presiden",
-    "istana",
-    "kementerian",
-    "menteri",
-    "dpr",
-    "kebijakan",
-    "negara",
-    "apbn",
-    "kabinet"
-]
+def contains_keyword(text):
+    text = text.lower()
+    return any(k in text for k in KEYWORDS)
 
 
-def parse_datetime(raw_date):
-    raw_date = raw_date.replace("WIB", "").strip()
-    raw_date = re.sub(r"^[A-Za-z]+,\s*", "", raw_date)
+def extract_article_content(url):
+    """
+    Ambil isi artikel Detik
+    """
+    r = requests.get(url, headers=HEADERS, timeout=20)
 
-    MONTH_MAP = {
-        "Januari": "January",
-        "Februari": "February",
-        "Maret": "March",
-        "April": "April",
-        "Mei": "May",
-        "Juni": "June",
-        "Juli": "July",
-        "Agustus": "August",
-        "September": "September",
-        "Oktober": "October",
-        "November": "November",
-        "Desember": "December"
+    if r.status_code != 200:
+        print("Failed open:", url)
+        return None
+
+    soup = BeautifulSoup(r.text, "html.parser")
+
+    # Title
+    title_tag = soup.find("h1", class_="detail__title")
+    title = title_tag.get_text(strip=True) if title_tag else ""
+
+    # Date
+    date_tag = soup.find("div", class_="detail__date")
+    published = ""
+    if date_tag:
+        # contoh: Selasa, 16 Desember 2025 14:30 WIB
+        raw = date_tag.get_text(strip=True)
+        published = parse_date_indonesia(raw)
+
+    # Content
+    content_div = soup.find("div", class_="detail__body-text")
+    if not content_div:
+        return None
+
+    paragraphs = content_div.find_all("p")
+    content = "\n".join([p.get_text(strip=True) for p in paragraphs])
+
+    full_text = f"{title} {content}".lower()
+
+    if not contains_keyword(full_text):
+        return None
+
+    return {
+        "title": title,
+        "published_date": published,
+        "content": content
     }
 
-    for indo, eng in MONTH_MAP.items():
-        raw_date = raw_date.replace(indo, eng)
 
-    formats = [
-        "%d %B %Y %H:%M",
-        "%d %b %Y %H:%M",
-        "%d %B %Y",
-        "%d %b %Y"
-    ]
+def parse_date_indonesia(text):
+    """
+    Selasa, 16 Desember 2025 14:30 WIB
+    → 2025-12-16
+    """
+    try:
+        text = text.split(",")[1].strip()
+        text = text.replace("WIB", "").strip()
 
-    for fmt in formats:
-        try:
-            return datetime.strptime(raw_date, fmt)
-        except ValueError:
-            continue
+        months = {
+            "Jan": "01", "Feb": "02", "Mar": "03",
+            "Apr": "04", "Mei": "05", "Jun": "06",
+            "Jul": "07", "Agu": "08", "Sep": "09",
+            "Okt": "10", "Nov": "11", "Des": "12"
+        }
 
-    return None
+        parts = text.split()
+        day = parts[0]
+        month = months[parts[1]]
+        year = parts[2]
 
-
-def get_article_links_by_date(date_str):
-    url = f"https://news.detik.com/berita/indeks?date={date_str}"
-    r = requests.get(url, headers=HEADERS, timeout=10)
-    if r.status_code != 200:
-        return []
-
-    soup = BeautifulSoup(r.text, "lxml")
-    links = []
-
-    for a in soup.find_all("a", class_="media__link"):
-        link = a.get("href")
-        title = None
-
-        # 1️⃣ dtr-ttl (jika ada)
-        if a.has_attr("dtr-ttl"):
-            title = a.get("dtr-ttl")
-
-        # 2️⃣ onclick (_pt(..., "JUDUL", ...))
-        if not title and a.has_attr("onclick"):
-            onclick = a.get("onclick")
-            parts = onclick.split('"')
-            if len(parts) >= 6:
-                title = parts[3]
-
-        # 3️⃣ fallback dari img alt
-        if not title:
-            img = a.find("img")
-            if img and img.has_attr("alt"):
-                title = img.get("alt")
-
-        if title and link:
-            links.append((title.strip(), link))
-
-    return links
+        return f"{year}-{month}-{day.zfill(2)}"
+    except:
+        return ""
 
 
-def extract_article(url):
-    r = requests.get(url, headers=HEADERS, timeout=10)
-    if r.status_code != 200:
-        return None, None
+def search_detik_by_keyword(keyword, start_date, end_date):
+    """
+    Crawl detik search result berdasarkan keyword dan range tanggal
+    Format tanggal: DD/MM/YYYY
+    """
+    all_articles = []
+    page = 1
 
-    soup = BeautifulSoup(r.text, "lxml")
+    while True:
+        url = (
+            "https://www.detik.com/search/searchnews"
+            f"?query={keyword}"
+            "&siteid=3"
+            f"&fromdatex={start_date}"
+            f"&todatex={end_date}"
+            "&result_type=latest"
+            f"&page={page}"
+        )
 
-    date_tag = soup.find("div", class_="detail__date")
-    if not date_tag:
-        return None, None
+        # print(f"Crawling: {url}")
 
-    raw_date = date_tag.get_text(strip=True)
-    published = parse_datetime(raw_date)
-    if not published:
-        return None, None
+        r = requests.get(url, headers=HEADERS, timeout=20)
 
-    paragraphs = soup.find_all("p")
-    content = " ".join(p.get_text(strip=True) for p in paragraphs)
+        if r.status_code != 200:
+            print("Status:", r.status_code)
+            break
 
-    if len(content) < 200:
-        return None, None
+        soup = BeautifulSoup(r.text, "html.parser")
 
-    return published, content
+        items = soup.find_all("article")
+
+        if not items:
+            print("No more result pages.")
+            break
+
+        for item in items:
+            link_tag = item.find("a", href=True)
+            if not link_tag:
+                continue
+
+            link = link_tag["href"]
+
+            article_data = extract_article_content(link)
+            if not article_data:
+                continue
+
+            all_articles.append({
+                "media": "Detik.com",
+                "title": article_data["title"],
+                "published_date": article_data["published_date"],
+                "link": link,
+                "content": article_data["content"],
+                "sentiment": ""
+            })
+
+            time.sleep(1)
+
+        page += 1
+        time.sleep(2)
+
+    return all_articles
+
+
+def format_date_ddmmyyyy(date_str):
+    """
+    Input: YYYY-MM-DD
+    Output: DD/MM/YYYY
+    """
+    d = datetime.strptime(date_str, "%Y-%m-%d")
+    return d.strftime("%d/%m/%Y")
+
+# # =========================
+# # MAIN CRAWLER
+# # =========================
+def crawl_detik(start_date: str, end_date: str):
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    start_date = start_date.strftime("%d/%m/%Y")
+    end_date = end_date.strftime("%d/%m/%Y")
+
+    all_data = []
+    print("🚀 Mulai crawling Detik...")
+    print("Start:", start_date, "End:", end_date)
+    for keyword in KEYWORDS:
+        # print("\nKeyword:", keyword)
+        articles = search_detik_by_keyword(keyword, start_date, end_date)
+        all_data.extend(articles)
+
+    return all_data
