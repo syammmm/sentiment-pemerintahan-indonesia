@@ -3,12 +3,33 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import time
 
-from config.settings import END_DATE, START_DATE
 from config.keywords import KEYWORDS
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
 }
+
+def create_session():
+    session = requests.Session()
+
+    retries = Retry(
+        total=5,
+        backoff_factor=2,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET"]
+    )
+
+    adapter = HTTPAdapter(max_retries=retries)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+
+    return session
+
+
+session = create_session()
+
 
 def contains_keyword(text):
     text = text.lower()
@@ -19,44 +40,57 @@ def extract_article_content(url):
     """
     Ambil isi artikel Detik
     """
-    r = requests.get(url, headers=HEADERS, timeout=20)
+    # r = requests.get(url, headers=HEADERS, timeout=20)
+    try:
+        r = session.get(url, headers=HEADERS, timeout=30)
 
-    if r.status_code != 200:
-        print("Failed open:", url)
+        if r.status_code != 200:
+            print("Failed open:", url)
+            return None
+
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        # Title
+        title_tag = soup.find("h1", class_="detail__title")
+        title = title_tag.get_text(strip=True) if title_tag else ""
+
+        # Date
+        date_tag = soup.find("div", class_="detail__date")
+        published = ""
+        if date_tag:
+            # contoh: Selasa, 16 Desember 2025 14:30 WIB
+            raw = date_tag.get_text(strip=True)
+            published = parse_date_indonesia(raw)
+
+        # Content
+        content_div = soup.find("div", class_="detail__body-text")
+        if not content_div:
+            return None
+
+        paragraphs = content_div.find_all("p")
+        content = "\n".join([p.get_text(strip=True) for p in paragraphs])
+
+        full_text = f"{title} {content}".lower()
+
+        if not contains_keyword(full_text):
+            return None
+
+        return {
+            "title": title,
+            "published_date": published,
+            "content": content
+        }
+    except requests.exceptions.ChunkedEncodingError:
+        print("⚠️ ChunkedEncodingError, skip article")
         return None
 
-    soup = BeautifulSoup(r.text, "html.parser")
-
-    # Title
-    title_tag = soup.find("h1", class_="detail__title")
-    title = title_tag.get_text(strip=True) if title_tag else ""
-
-    # Date
-    date_tag = soup.find("div", class_="detail__date")
-    published = ""
-    if date_tag:
-        # contoh: Selasa, 16 Desember 2025 14:30 WIB
-        raw = date_tag.get_text(strip=True)
-        published = parse_date_indonesia(raw)
-
-    # Content
-    content_div = soup.find("div", class_="detail__body-text")
-    if not content_div:
+    except requests.exceptions.ReadTimeout:
+        print("⚠️ Timeout, skip article")
         return None
 
-    paragraphs = content_div.find_all("p")
-    content = "\n".join([p.get_text(strip=True) for p in paragraphs])
-
-    full_text = f"{title} {content}".lower()
-
-    if not contains_keyword(full_text):
+    except requests.exceptions.RequestException as e:
+        print("⚠️ Request error:", e)
         return None
-
-    return {
-        "title": title,
-        "published_date": published,
-        "content": content
-    }
 
 
 def parse_date_indonesia(text):
@@ -106,7 +140,8 @@ def search_detik_by_keyword(keyword, start_date, end_date):
 
         # print(f"Crawling: {url}")
 
-        r = requests.get(url, headers=HEADERS, timeout=20)
+        # r = requests.get(url, headers=HEADERS, timeout=20)
+        r = session.get(url, headers=HEADERS, timeout=30)
 
         if r.status_code != 200:
             print("Status:", r.status_code)

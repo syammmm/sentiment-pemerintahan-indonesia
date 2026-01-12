@@ -25,16 +25,28 @@ def generate_date_ranges(start_date: datetime, end_date: datetime):
 # =========================
 def safe_get(url, session, retries=5):
     for i in range(retries):
-        r = session.get(url, timeout=20)
-        if r.status_code == 200:
-            return r
+        try :
+            r = session.get(url, timeout=30)
+            if r.status_code == 200:
+                return r
 
-        if r.status_code == 429:
-            wait = 5 * (i + 1)
-            print(f"⚠️ 429 detected, retry in {wait}s")
-            time.sleep(wait)
+            if r.status_code == 429:
+                wait = 5 * (i + 1)
+                print(f"⚠️ 429 detected, retry in {wait}s")
+                time.sleep(wait)
 
-        else:
+            else:
+                return None
+        except requests.exceptions.ChunkedEncodingError:
+            print("⚠️ ChunkedEncodingError, skip article")
+            return None
+
+        except requests.exceptions.ReadTimeout:
+            print("⚠️ Timeout, skip article")
+            return None
+
+        except requests.exceptions.RequestException as e:
+            print("⚠️ Request error:", e)
             return None
 
     return None
