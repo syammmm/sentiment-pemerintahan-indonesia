@@ -1,0 +1,2 @@
+touch nlp_pipeline/data/raw/.gitkeep
+touch nlp_pipeline/data/processed/.gitkeep

@@ -6,13 +6,12 @@ from crawlers.tempo import crawl_tempo
 from crawlers.cnn import crawl_cnn
 from config.settings import RAW_DATA_DIR, create_timestamp
 
-START_DATE = date(2025, 6, 1)
-END_DATE = date(2025, 6, 30)
+START_DATE = date(2025, 7, 1)
+END_DATE = date(2025, 7, 31)
 
 # Name output file
-excel_path = RAW_DATA_DIR / "media_elektronik_2025_Juni.xlsx"
-csv_path = RAW_DATA_DIR / "media_elektronik_2025_Juni.csv"
-
+excel_path = RAW_DATA_DIR / "media_elektronik_2025_Juli.xlsx"
+csv_path = RAW_DATA_DIR / "media_elektronik_2025_Juli.csv"
 #MAIN CRAWLER
 if __name__ == "__main__":
     START_DATE = START_DATE.strftime("%Y-%m-%d")

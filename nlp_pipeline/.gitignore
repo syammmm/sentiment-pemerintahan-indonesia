@@ -32,10 +32,10 @@ env/
 # =========================
 
 # Ignore all raw crawling data
-nlp_pipeline/data/raw/
-nlp_pipeline/data/processed/
-nlp_pipeline/data/labeled/
-nlp_pipeline/data/archive/
+data/raw/
+data/processed/
+data/labeled/
+data/archive/
 
 # Ignore common data formats
 *.csv
@@ -50,9 +50,9 @@ nlp_pipeline/data/archive/
 # =========================
 # Models & Artifacts (optional)
 # =========================
-nlp_pipeline/models/*.pkl
-nlp_pipeline/models/*.joblib
-nlp_pipeline/models/*.h5
+models/*.pkl
+models/*.joblib
+models/*.h5
 
 # =========================
 # Logs
