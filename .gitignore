@@ -35,6 +35,7 @@ env/
 data/raw/
 data/processed/
 data/labeled/
+data/archive/
 
 # Ignore common data formats
 *.csv

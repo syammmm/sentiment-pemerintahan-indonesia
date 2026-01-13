@@ -18,7 +18,7 @@ def clean_text(text):
 
 
 # ===== Load Dataset =====
-df = pd.read_excel("data/labeled/manual labeled_sentimen_pemerintahan.xlsx")
+df = pd.read_excel("data/labeled/base_data_sentimen_pemerintahan.xlsx")
 
 df = df.dropna(subset=["content", "sentiment"])
 # df["clean_text"] = df["content"].astype(str).apply(clean_text)
@@ -98,7 +98,7 @@ print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
 # =========================
 # Save Model
 # =========================
-joblib.dump(best_model, "models/logistic_model_optimized_fixed.pkl")
-joblib.dump(pipeline.named_steps["tfidf"], "models/tfidf_vectorizer_optimized_fixed.pkl")
+joblib.dump(best_model, "models/logistic_model_optimized_final.pkl")
+joblib.dump(pipeline.named_steps["tfidf"], "models/tfidf_vectorizer_optimized_final.pkl")
 
-print("\nModel saved to models/logistic_model_optimized_fixed.pkl")
+print("\nModel saved to models/logistic_model_optimized_final.pkl")

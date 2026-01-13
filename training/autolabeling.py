@@ -1,8 +1,19 @@
 import pandas as pd
 import joblib
 
+from config.settings import RAW_DATA_DIR, LABELLED_DATA_DIR
+
+
+# Input path
+excel_path_raw = RAW_DATA_DIR / "media_elektronik_2025_May.xlsx"
+
+# Output paths
+excel_path_low_conf = LABELLED_DATA_DIR / "[labeled_lowconfidence]media_elektronik_2025_May.xlsx"
+excel_path_high_conf = LABELLED_DATA_DIR / "[labeled_highconfidence]media_elektronik_2025_May.xlsx"
+excel_path_all = LABELLED_DATA_DIR / "[labeled_all]media_elektronik_2025_May.xlsx"
+
 # Load data baru
-df = pd.read_excel("data/raw/media_elektronik_2024_2025_March.xlsx")
+df = pd.read_excel(excel_path_raw)
 
 # Load model & vectorizer
 model = joblib.load("models/logistic_model_optimized.pkl")
@@ -34,13 +45,21 @@ df["confidence"] = confidence
 # =============================
 THRESHOLD = 0.8
 df_high_conf = df[df["confidence"] >= THRESHOLD].copy()
+# Low Confidence
+df_low_conf = df[df["confidence"] < THRESHOLD].copy()
 
 # Simpan hasil auto labeling
-df.to_excel("data/labeled/[labeled]media_elektronik_2024_2025_MAR.xlsx", index=False)
+df.to_excel(excel_path_all, index=False)
 
 #high confidence
-df_high_conf.to_excel(
-    "data/labeled/[labeled_highconfidence]media_elektronik_2024_2025_MAR.xlsx",
+# df_high_conf.to_excel(
+#     excel_path_high_conf,
+#     index=False
+# )
+
+#low confidence
+df_low_conf.to_excel(
+    excel_path_low_conf,
     index=False
 )
 
