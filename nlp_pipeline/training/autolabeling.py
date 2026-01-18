@@ -5,19 +5,19 @@ from nlp_pipeline.config.settings import RAW_DATA_DIR, LABELLED_DATA_DIR
 
 
 # Input path
-excel_path_raw = RAW_DATA_DIR / "media_elektronik_2025_Juli.xlsx"
+excel_path_raw = RAW_DATA_DIR / "media_elektronik_2025_August.xlsx"
 
 # Output paths
-excel_path_low_conf = LABELLED_DATA_DIR / "[labeled_lowconfidence]media_elektronik_2025_Juli.xlsx"
-excel_path_high_conf = LABELLED_DATA_DIR / "[labeled_highconfidence]media_elektronik_2025_Juli.xlsx"
-excel_path_all = LABELLED_DATA_DIR / "[labeled_all]media_elektronik_2025_Juli.xlsx"
+excel_path_low_conf = LABELLED_DATA_DIR / "[labeled_lowconfidence]media_elektronik_2025_August.xlsx"
+excel_path_high_conf = LABELLED_DATA_DIR / "[labeled_highconfidence]media_elektronik_2025_August.xlsx"
+excel_path_all = LABELLED_DATA_DIR / "[labeled_all]media_elektronik_2025_August.xlsx"
 
 # Load data baru
 df = pd.read_excel(excel_path_raw)
 
 # Load model & vectorizer
-model = joblib.load("models/logistic_model_optimized.pkl")
-tfidf = joblib.load("models/tfidf_vectorizer_optimized.pkl")
+model = joblib.load("nlp_pipeline/models/logistic_model_optimized.pkl")
+tfidf = joblib.load("nlp_pipeline/models/tfidf_vectorizer_optimized.pkl")
 
 # Pastikan kolom content ada
 texts = df["content"].astype(str)
