@@ -15,6 +15,14 @@ excel_path_all = LABELLED_DATA_DIR / "[labeled_all]media_elektronik_2025_August.
 # Load data baru
 df = pd.read_excel(excel_path_raw)
 
+# Convert to datetime
+df["published_date"] = pd.to_datetime(df["published_date"], errors="coerce")
+
+# Delete rows with invalid published_date
+df = df.dropna(subset=["published_date"])
+
+df["published_date"] = df["published_date"].dt.strftime("%Y-%m-%d")
+
 # Load model & vectorizer
 model = joblib.load("nlp_pipeline/models/logistic_model_optimized.pkl")
 tfidf = joblib.load("nlp_pipeline/models/tfidf_vectorizer_optimized.pkl")
