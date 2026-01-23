@@ -6,8 +6,8 @@ from crawlers.tempo import crawl_tempo
 from crawlers.cnn import crawl_cnn
 from config.settings import RAW_DATA_DIR, create_timestamp
 
-START_DATE = date(2025, 12, 1)
-END_DATE = date(2025, 12, 31)
+START_DATE = date(2025, 12, 1) # Edit as needed
+END_DATE = date(2025, 12, 31) # Edit as needed
 
 # Name output file
 excel_path = RAW_DATA_DIR / "media_elektronik_2025_December.xlsx"
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     print("Finish Time ALL:", create_timestamp())
 
     df = pd.DataFrame(data_all)
-    df.drop_duplicates(subset=["link"], inplace=True)
+    df.drop_duplicates(subset=["link"], inplace=True) # Detik.com have duplicate links
     print(f"✅ Total artikel Tempo: {len(data_tempo)}")
     print(f"✅ Total artikel Detik: {len(data_detik)}")
     print(f"✅ Total artikel CNN: {len(data_cnn)}")

@@ -81,15 +81,15 @@ def extract_article_content(url):
             "content": content
         }
     except requests.exceptions.ChunkedEncodingError:
-        print("⚠️ ChunkedEncodingError, skip article")
+        print("ChunkedEncodingError, skip article")
         return None
 
     except requests.exceptions.ReadTimeout:
-        print("⚠️ Timeout, skip article")
+        print("Timeout, skip article")
         return None
 
     except requests.exceptions.RequestException as e:
-        print("⚠️ Request error:", e)
+        print("Request error:", e)
         return None
 
 

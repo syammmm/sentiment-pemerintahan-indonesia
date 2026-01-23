@@ -32,21 +32,21 @@ def safe_get(url, session, retries=5):
 
             if r.status_code == 429:
                 wait = 5 * (i + 1)
-                print(f"⚠️ 429 detected, retry in {wait}s")
+                print(f"429 detected, retry in {wait}s")
                 time.sleep(wait)
 
             else:
                 return None
         except requests.exceptions.ChunkedEncodingError:
-            print("⚠️ ChunkedEncodingError, skip article")
+            print("ChunkedEncodingError, skip article")
             return None
 
         except requests.exceptions.ReadTimeout:
-            print("⚠️ Timeout, skip article")
+            print("Timeout, skip article")
             return None
 
         except requests.exceptions.RequestException as e:
-            print("⚠️ Request error:", e)
+            print("Request error:", e)
             return None
 
     return None
