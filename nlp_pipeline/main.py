@@ -4,14 +4,11 @@ from datetime import date
 from crawlers.detik import crawl_detik
 from crawlers.tempo import crawl_tempo
 from crawlers.cnn import crawl_cnn
-from config.settings import RAW_DATA_DIR, create_timestamp
-
-START_DATE = date(2025, 12, 1) # Edit as needed
-END_DATE = date(2025, 12, 31) # Edit as needed
+from config.settings import RAW_DATA_DIR, create_timestamp, START_DATE, END_DATE, DATE_TEXT
 
 # Name output file
-excel_path = RAW_DATA_DIR / "media_elektronik_2025_December.xlsx"
-csv_path = RAW_DATA_DIR / "media_elektronik_2025_December.csv"
+excel_path = RAW_DATA_DIR / f"media_elektronik_{DATE_TEXT}.xlsx"
+csv_path = RAW_DATA_DIR / f"media_elektronik_{DATE_TEXT}.csv"
 #MAIN CRAWLER
 if __name__ == "__main__":
     START_DATE = START_DATE.strftime("%Y-%m-%d")

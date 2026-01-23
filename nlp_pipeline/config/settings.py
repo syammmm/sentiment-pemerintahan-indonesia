@@ -1,12 +1,18 @@
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 # =========================
 # DATE RANGE
 # =========================
-START_DATE = datetime(2024, 1, 1)
-END_DATE = datetime(2025, 12, 31)
+START_DATE = date(2025, 12, 1) # Edit as needed
+END_DATE = date(2025, 12, 31) # Edit as needed
+DATE_TEXT = (
+    f"{START_DATE.year}_"
+    f"{START_DATE.strftime('%B')}_"
+    f"{START_DATE.day}_-_"
+    f"{END_DATE.day}"
+)
 
 # =========================
 # PATH

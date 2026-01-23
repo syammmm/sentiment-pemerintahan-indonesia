@@ -76,7 +76,7 @@ cd ..
 
 ### 📝 Konfigurasi
 
-Sebelum menjalankan script, edit file [nlp_pipeline/main.py](nlp_pipeline/main.py#L9-L10) untuk mengatur rentang tanggal yang ingin di-scraping:
+Sebelum menjalankan script, edit file [nlp_pipeline/config/settings.py] untuk mengatur rentang tanggal yang ingin di-scraping:
 
 ```python
 START_DATE = date(2025, 12, 1)  # Edit as needed - Format: (YYYY, MM, DD)
@@ -135,10 +135,10 @@ Finish Time ALL: 2025-01-23 14:42:20
 
 Setelah script selesai, data akan tersimpan di `nlp_pipeline/data/raw/` dalam dua format:
 
-- **File Excel**: `media_elektronik_2025_December.xlsx`
-- **File CSV**: `media_elektronik_2025_December.csv`
+- **File Excel**: `media_elektronik_[range date].xlsx`
+- **File CSV**: `media_elektronik_[range date].csv`
 
-Penamaan file mengikuti format: `media_elektronik_[TAHUN]_[BULAN].xlsx`
+Penamaan file mengikuti format: `media_elektronik_[range date].xlsx`
 
 **Struktur data:**
 - Kombinasi artikel dari 3 media: Tempo, Detik, CNN

@@ -1,16 +1,15 @@
 import pandas as pd
 import joblib
 
-from nlp_pipeline.config.settings import RAW_DATA_DIR, LABELLED_DATA_DIR
+from nlp_pipeline.config.settings import RAW_DATA_DIR, LABELLED_DATA_DIR,DATE_TEXT
 
 
 # Input path
-excel_path_raw = RAW_DATA_DIR / "media_elektronik_2025_August.xlsx"
-
+excel_path_raw = RAW_DATA_DIR / f"media_elektronik_{DATE_TEXT}.xlsx"
 # Output paths
-excel_path_low_conf = LABELLED_DATA_DIR / "[labeled_lowconfidence]media_elektronik_2025_August.xlsx"
-excel_path_high_conf = LABELLED_DATA_DIR / "[labeled_highconfidence]media_elektronik_2025_August.xlsx"
-excel_path_all = LABELLED_DATA_DIR / "[labeled_all]media_elektronik_2025_August.xlsx"
+excel_path_low_conf = LABELLED_DATA_DIR / f"[labeled_lowconfidence]media_elektronik_{DATE_TEXT}.xlsx"
+excel_path_high_conf = LABELLED_DATA_DIR / f"[labeled_highconfidence]media_elektronik_{DATE_TEXT}.xlsx"
+excel_path_all = LABELLED_DATA_DIR / f"[labeled_all]media_elektronik_{DATE_TEXT}.xlsx"
 
 # Load data baru
 df = pd.read_excel(excel_path_raw)
