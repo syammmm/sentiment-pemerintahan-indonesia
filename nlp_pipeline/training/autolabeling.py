@@ -59,10 +59,10 @@ df_low_conf = df[df["confidence"] < THRESHOLD].copy()
 df.to_excel(excel_path_all, index=False)
 
 #high confidence
-# df_high_conf.to_excel(
-#     excel_path_high_conf,
-#     index=False
-# )
+df_high_conf.to_excel(
+    excel_path_high_conf,
+    index=False
+)
 
 #low confidence
 df_low_conf.to_excel(
